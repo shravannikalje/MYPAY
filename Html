@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PayFlow Super App Demo</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-title">PayFlow Login</div>
+    <div class="login-sub">Mobile number + OTP टाकून login करा</div>
+    <input id="loginMobile" type="tel" maxlength="10" placeholder="Enter 10-digit mobile" aria-label="Mobile number" />
+    <div class="actions">
+      <button id="sendOtpBtn" type="button">Send OTP</button>
+      <button id="verifyOtpBtn" class="secondary" type="button">Verify OTP</button>
+    </div>
+    <input id="otpInput" type="tel" maxlength="6" placeholder="Enter 6-digit OTP" aria-label="OTP" />
+    <div id="demoOtpBox" class="demo-otp">Demo OTP इथे दिसेल</div>
+    <div id="loginStatus" class="status">Start करण्यासाठी mobile number टाका.</div>
+  </div>
+
+  <div class="app hidden">
+    <div class="topbar">
+      <div class="brand">PayFlow</div>
+      <div class="top-right">
+        <div class="pill">Demo Super App</div>
+        <button id="logoutBtn" class="logout-btn" type="button">Logout</button>
+      </div>
+    </div>
+
+    <div class="screen">
+      <section id="home" class="section active">
+        <h2>Home</h2>
+        <p class="sub">Send money, scan QR, pay bills, recharge, booking — all in one.</p>
+
+        <div class="quick">
+          <button class="icon-btn" data-go="recharge">📱<br/>Recharge</button>
+          <button class="icon-btn" data-go="bills">💡<br/>Bills</button>
+          <button class="icon-btn" data-go="booking">🎟️<br/>Booking</button>
+          <button class="icon-btn" data-go="qrpay">🧾<br/>Scan & Pay</button>
+        </div>
+
+        <div class="card">
+          Merchant: <strong>Demo Merchant</strong><br/>
+          UPI Handle: <strong id="payeeInfo">7823802792@upi</strong>
+        </div>
+
+        <div class="grid-2">
+          <button class="module-pay" data-module="Send Money" data-amount="1">Send ₹1</button>
+          <button class="module-pay" data-module="Wallet Topup" data-amount="25">Topup ₹25</button>
+        </div>
+      </section>
+
+      <section id="recharge" class="section">
+        <h2>Mobile Recharge</h2>
+        <p class="sub">PhonePe-style quick recharge experience (demo). </p>
+        <div class="card">
+          <div class="row">
+            <input id="mobileNumber" type="tel" placeholder="Mobile Number" maxlength="10" />
+            <select id="operator" title="Operator" aria-label="Mobile operator">
+              <option value="Jio">Jio</option>
+              <option value="Airtel">Airtel</option>
+              <option value="Vi">Vi</option>
+              <option value="BSNL">BSNL</option>
+            </select>
+          </div>
+          <div class="grid-2">
+            <button class="module-pay" data-module="Recharge ₹199" data-amount="199">₹199</button>
+            <button class="module-pay" data-module="Recharge ₹399" data-amount="399">₹399</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="bills" class="section">
+        <h2>Bills</h2>
+        <p class="sub">Electricity / DTH / Fastag bill payments.</p>
+        <div class="grid-2">
+          <button class="module-pay" data-module="Electricity Bill" data-amount="250">Electricity ₹250</button>
+          <button class="module-pay" data-module="DTH Recharge" data-amount="300">DTH ₹300</button>
+          <button class="module-pay" data-module="Water Bill" data-amount="180">Water ₹180</button>
+          <button class="module-pay" data-module="Fastag" data-amount="500">Fastag ₹500</button>
+        </div>
+      </section>
+
+      <section id="booking" class="section">
+        <h2>Booking</h2>
+        <p class="sub">Flight, Bus, Train booking payment shortcuts.</p>
+        <div class="card">
+          <input id="fromCity" type="text" placeholder="From city" />
+          <br/><br/>
+          <input id="toCity" type="text" placeholder="To city" />
+        </div>
+        <div class="grid-2">
+          <button class="module-pay" data-module="Bus Booking" data-amount="499">Bus ₹499</button>
+          <button class="module-pay" data-module="Train Booking" data-amount="749">Train ₹749</button>
+          <button class="module-pay" data-module="Flight Booking" data-amount="2499">Flight ₹2499</button>
+          <button class="module-pay" data-module="Hotel Booking" data-amount="1299">Hotel ₹1299</button>
+        </div>
+      </section>
+
+      <section id="qrpay" class="section">
+        <h2>Scan & Pay</h2>
+        <p class="sub">QR scan करा किंवा gateway ने pay करा.</p>
+
+        <div class="row">
+          <input id="amountInput" type="number" min="1" value="1" title="Enter amount" placeholder="Enter amount" aria-label="Payment amount" />
+          <button id="updateBtn" type="button">Update QR</button>
+        </div>
+
+        <div class="qr-wrap">
+          <img id="qrImage" alt="Payment QR Code" />
+        </div>
+
+        <div class="amount">Amount: ₹<span id="amountText">1</span></div>
+
+        <div class="actions actions-3">
+          <button class="cta" id="upiAppBtn" type="button">Pay via UPI App</button>
+          <button class="cta" id="payBtn" type="button">Check Live Status</button>
+          <button class="cta secondary" id="gatewayBtn" type="button">Pay Online</button>
+        </div>
+
+        <p class="note">Real-time flow: create order → pay → signature verify → auto status.</p>
+      </section>
+
+      <section id="history" class="section">
+        <h2>Transactions</h2>
+        <p class="sub">Latest successful/attempted payments.</p>
+        <div id="txnList"></div>
+      </section>
+
+      <div id="status" class="status">App ready. Select a service and pay.</div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn active" data-nav="home">Home</button>
+      <button class="nav-btn" data-nav="recharge">Recharge</button>
+      <button class="nav-btn" data-nav="booking">Booking</button>
+      <button class="nav-btn" data-nav="history">History</button>
+    </div>
+  </div>
+
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    const payee = "7823802792@upi";
+    const merchantName = "Demo Merchant";
+    const hostedApiBase = (window.GO_CAR_API_BASE || localStorage.getItem("GO_CAR_API_BASE") || "").trim();
+    const isGithubPages = window.location.hostname.includes("github.io");
+    const apiBase = isGithubPages
+      ? (hostedApiBase || "https://REPLACE_WITH_RAILWAY_BACKEND_URL")
+      : (window.location.protocol === "file:" ? "http://localhost:3000" : window.location.origin);
+    const amountInput = document.getElementById("amountInput");
+    const amountText = document.getElementById("amountText");
+    const qrImage = document.getElementById("qrImage");
+    const statusBox = document.getElementById("status");
+    const upiAppBtn = document.getElementById("upiAppBtn");
+    const gatewayBtn = document.getElementById("gatewayBtn");
+    const txnList = document.getElementById("txnList");
+    const loginScreen = document.getElementById("loginScreen");
+    const appShell = document.querySelector(".app");
+    const loginMobile = document.getElementById("loginMobile");
+    const sendOtpBtn = document.getElementById("sendOtpBtn");
+    const verifyOtpBtn = document.getElementById("verifyOtpBtn");
+    const otpInput = document.getElementById("otpInput");
+    const loginStatus = document.getElementById("loginStatus");
+    const demoOtpBox = document.getElementById("demoOtpBox");
+    const logoutBtn = document.getElementById("logoutBtn");
+    let latestOrderId = null;
+    let pollTimer = null;
+
+    const STORAGE_KEY = "payflow_txns";
+    const AUTH_KEY = "payflow_auth";
+
+    function getTransactions() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTransaction(entry) {
+      const list = getTransactions();
+      list.unshift({ ...entry, time: new Date().toLocaleString() });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 20)));
+      renderTransactions();
+    }
+
+    function renderTransactions() {
+      const list = getTransactions();
+      txnList.innerHTML = list.length
+        ? list.map((t) => `<div class="txn-item"><strong>${t.module}</strong><br/>₹${t.amount} • ${t.status}<br/>${t.ref || "-"}<br/>${t.time}</div>`).join("")
+        : `<div class="card">No transactions yet.</div>`;
+    }
+
+    function setStatus(msg, type = "normal") {
+      statusBox.className = type === "ok" ? "status ok" : type === "bad" ? "status bad" : "status";
+      statusBox.innerHTML = msg;
+    }
+
+    function setLoginStatus(msg, type = "normal") {
+      loginStatus.className = type === "ok" ? "status ok" : type === "bad" ? "status bad" : "status";
+      loginStatus.innerHTML = msg;
+    }
+
+    async function parseApiResponse(res) {
+      const contentType = (res.headers.get("content-type") || "").toLowerCase();
+
+      if (contentType.includes("application/json")) {
+        const data = await res.json();
+        return { data, raw: "" };
+      }
+
+      const raw = await res.text();
+      try {
+        const data = JSON.parse(raw);
+        return { data, raw };
+      } catch {
+        if (raw.trim().startsWith("<!DOCTYPE html")) {
+          throw new Error("API route मिळाली नाही. App http://localhost:3000 वरून उघडा.");
+        }
+        throw new Error("Server ने invalid response दिला. Server restart करून पुन्हा try करा.");
+      }
+    }
+
+    function showApp(mobile) {
+      loginScreen.classList.add("hidden");
+      appShell.classList.remove("hidden");
+      const pill = document.querySelector(".pill");
+      if (pill) {
+        pill.textContent = `+91 ${mobile}`;
+      }
+    }
+
+    function hideApp() {
+      appShell.classList.add("hidden");
+      loginScreen.classList.remove("hidden");
+    }
+
+    function logout() {
+      sessionStorage.removeItem(AUTH_KEY);
+      otpInput.value = "";
+      loginMobile.value = "";
+      demoOtpBox.innerHTML = "Demo OTP इथे दिसेल";
+      setLoginStatus("Logout successful. पुन्हा login करा.");
+      hideApp();
+    }
+
+    async function sendOtp() {
+      const mobile = loginMobile.value.trim();
+      if (!/^\d{10}$/.test(mobile)) {
+        setLoginStatus("Valid 10-digit mobile number टाका.", "bad");
+        return;
+      }
+
+      setLoginStatus("Sending OTP...");
+      try {
+        const res = await fetch(`${apiBase}/api/auth/send-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile })
+        });
+        const { data } = await parseApiResponse(res);
+        if (!res.ok || !data.ok) {
+          throw new Error(data?.message || "Failed to send OTP");
+        }
+        if (data.demoOtp) {
+          otpInput.value = data.demoOtp;
+          demoOtpBox.innerHTML = `Demo OTP: <strong>${data.demoOtp}</strong>`;
+          setLoginStatus(`OTP sent. Demo OTP: <strong>${data.demoOtp}</strong>`, "ok");
+        } else {
+          demoOtpBox.innerHTML = "OTP sent to SMS";
+          setLoginStatus("OTP sent successfully. Please check SMS.", "ok");
+        }
+      } catch (err) {
+        setLoginStatus(`OTP send failed: ${err.message}`, "bad");
+      }
+    }
+
+    async function verifyOtp() {
+      const mobile = loginMobile.value.trim();
+      const otp = otpInput.value.trim();
+      if (!/^\d{10}$/.test(mobile)) {
+        setLoginStatus("Valid mobile number टाका.", "bad");
+        return;
+      }
+      if (!/^\d{6}$/.test(otp)) {
+        setLoginStatus("Valid 6-digit OTP टाका.", "bad");
+        return;
+      }
+
+      setLoginStatus("Verifying OTP...");
+      try {
+        const res = await fetch(`${apiBase}/api/auth/verify-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile, otp })
+        });
+        const { data } = await parseApiResponse(res);
+        if (!res.ok || !data.ok) {
+          throw new Error(data?.message || "OTP verify failed");
+        }
+
+        sessionStorage.setItem(AUTH_KEY, JSON.stringify({ token: data.token, mobile: data.mobile }));
+        setLoginStatus("Login successful ✅", "ok");
+        showApp(data.mobile);
+      } catch (err) {
+        setLoginStatus(`Login failed: ${err.message}`, "bad");
+      }
+    }
+
+    function getAmount() {
+      const amount = Number(amountInput.value);
+      return amount > 0 ? amount : 1;
+    }
+
+    function getUpiUrl(amount) {
+      const txnNote = encodeURIComponent(`Demo transaction for ${payee}`);
+      return `upi://pay?pa=${encodeURIComponent(payee)}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${txnNote}`;
+    }
+
+    function buildQrImage(amount) {
+      const upiUrl = getUpiUrl(amount);
+      qrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiUrl)}`;
+      amountText.textContent = amount;
+      setStatus(`QR updated for ₹${amount}.`);
+    }
+
+    function stopPolling() {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    }
+
+    async function fetchLiveStatus(orderId) {
+      const res = await fetch(`${apiBase}/api/payment-status/${encodeURIComponent(orderId)}`);
+      const { data } = await parseApiResponse(res);
+      if (!res.ok) {
+        throw new Error(data?.message || "Unable to fetch live status");
+      }
+      return data;
+    }
+
+    function renderStatusFromLive(data) {
+      if (data.status === "paid") {
+        setStatus(`✅ Payment Captured!<br>Amount: ₹${amountText.textContent}<br>Order ID: <strong>${data.orderId}</strong><br>Payment ID: <strong>${data.paymentId || "N/A"}</strong>`, "ok");
+        return true;
+      }
+
+      if (data.status === "failed") {
+        setStatus(`❌ Payment Failed.<br>Order ID: <strong>${data.orderId}</strong>`, "bad");
+        return true;
+      }
+
+      if (data.status === "authorized") {
+        setStatus(`⌛ Payment Authorized, capturing...<br>Order ID: <strong>${data.orderId}</strong>`);
+        return false;
+      }
+
+      setStatus(`⌛ Waiting for payment...<br>Order ID: <strong>${data.orderId}</strong>`);
+      return false;
+    }
+
+    function startRealtimePolling(orderId) {
+      stopPolling();
+      const startedAt = Date.now();
+
+      const check = async () => {
+        try {
+          const data = await fetchLiveStatus(orderId);
+          const done = renderStatusFromLive(data);
+          if (done) {
+            stopPolling();
+            return;
+          }
+
+          if (Date.now() - startedAt > 120000) {
+            stopPolling();
+            setStatus(`⌛ Still pending.<br>Click <strong>Check Live Status</strong> to retry.`);
+          }
+        } catch (err) {
+          stopPolling();
+          setStatus(`Live status error: ${err.message}`, "bad");
+        }
+      };
+
+      check();
+      pollTimer = setInterval(check, 3000);
+    }
+
+    async function checkLatestOrderStatus() {
+      if (!latestOrderId) {
+        setStatus("No active order. First click Pay Online.", "bad");
+        return;
+      }
+
+      setStatus("Checking live payment status...");
+      startRealtimePolling(latestOrderId);
+    }
+
+    async function loadConfigStatus() {
+      try {
+        if (apiBase.includes("REPLACE_WITH_RAILWAY_BACKEND_URL")) {
+          setStatus("⚠ Backend URL set केलेला नाही. GO_CAR_API_BASE मध्ये Railway URL द्या.", "bad");
+          return;
+        }
+
+        const res = await fetch(`${apiBase}/api/config-status`);
+        const { data } = await parseApiResponse(res);
+
+        if (!res.ok) {
+          return;
+        }
+
+        if (!data.configured) {
+          gatewayBtn.disabled = true;
+          gatewayBtn.style.opacity = "0.6";
+          gatewayBtn.style.cursor = "not-allowed";
+          setStatus("⚠ Razorpay off आहे.<br>UPI App button वापरून real payment करू शकता.", "bad");
+        }
+      } catch (_err) {
+        // ignore config-check errors and keep default UI
+      }
+    }
+
+    function payViaUpiApp() {
+      const amount = getAmount();
+      const upiUrl = getUpiUrl(amount);
+      setStatus(`UPI app opening for ₹${amount}...`);
+      window.location.href = upiUrl;
+    }
+
+    async function payOnlineWithGateway(moduleName = "QR Payment", amount = getAmount()) {
+
+      if (typeof window.Razorpay !== "function") {
+        setStatus("Gateway SDK failed to load. Check internet connection.", "bad");
+        return;
+      }
+
+      setStatus("Creating secure order...");
+
+      let orderData;
+      try {
+        const orderRes = await fetch(`${apiBase}/api/create-order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount })
+        });
+
+        ({ data: orderData } = await parseApiResponse(orderRes));
+        if (!orderRes.ok) {
+          throw new Error(orderData?.message || "Order creation failed");
+        }
+        latestOrderId = orderData.orderId;
+      } catch (err) {
+        setStatus(`Unable to create order: ${err.message}`, "bad");
+        return;
+      }
+
+      const options = {
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: merchantName,
+        description: `${moduleName} for ${payee}`,
+        order_id: orderData.orderId,
+        prefill: {
+          contact: "7823802792"
+        },
+        notes: {
+          payee,
+          source: "QR Demo Page"
+        },
+        theme: {
+          color: "#0ea5e9"
+        },
+        handler: async function (response) {
+          setStatus("Verifying payment signature...");
+
+          try {
+            const verifyRes = await fetch(`${apiBase}/api/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                amount
+              })
+            });
+
+            const { data: verifyData } = await parseApiResponse(verifyRes);
+            if (!verifyRes.ok || !verifyData.verified) {
+              throw new Error(verifyData?.message || "Verification failed");
+            }
+
+            setStatus(`✅ Payment Verified!<br>${moduleName}<br>Amount: ₹${amount}<br>Order ID: <strong>${response.razorpay_order_id}</strong><br>Payment ID: <strong>${response.razorpay_payment_id}</strong>`, "ok");
+            saveTransaction({ module: moduleName, amount, status: "Success", ref: response.razorpay_payment_id });
+            stopPolling();
+          } catch (err) {
+            setStatus(`⚠ Payment done but verify failed.<br>${err.message}`, "bad");
+            saveTransaction({ module: moduleName, amount, status: "Verify Failed", ref: response.razorpay_payment_id || "N/A" });
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setStatus("Payment popup closed. You can retry anytime.");
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", function (res) {
+        setStatus(`❌ Payment failed.<br>${res.error?.description || "Please try again."}`, "bad");
+        saveTransaction({ module: moduleName, amount, status: "Failed", ref: res.error?.code || "ERR" });
+      });
+
+      setStatus("Opening secure payment gateway...");
+      startRealtimePolling(orderData.orderId);
+      rzp.open();
+    }
+
+    function goTo(sectionId) {
+      document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
+      document.querySelectorAll(".nav-btn").forEach((n) => n.classList.remove("active"));
+      const section = document.getElementById(sectionId);
+      if (section) section.classList.add("active");
+      const navBtn = document.querySelector(`.nav-btn[data-nav="${sectionId}"]`);
+      if (navBtn) navBtn.classList.add("active");
+    }
+
+    document.getElementById("updateBtn").addEventListener("click", () => {
+      const amount = getAmount();
+      buildQrImage(amount);
+    });
+
+    document.getElementById("payBtn").addEventListener("click", checkLatestOrderStatus);
+    upiAppBtn.addEventListener("click", payViaUpiApp);
+    document.getElementById("gatewayBtn").addEventListener("click", () => payOnlineWithGateway("QR Payment", getAmount()));
+    sendOtpBtn.addEventListener("click", sendOtp);
+    verifyOtpBtn.addEventListener("click", verifyOtp);
+    logoutBtn.addEventListener("click", logout);
+
+    document.querySelectorAll(".module-pay").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const moduleName = btn.getAttribute("data-module") || "Service Payment";
+        const amount = Number(btn.getAttribute("data-amount") || "1");
+        amountInput.value = String(amount);
+        amountText.textContent = String(amount);
+        buildQrImage(amount);
+        goTo("qrpay");
+        if (gatewayBtn.disabled) {
+          setStatus(`Gateway off आहे. ${moduleName} साठी UPI App button वापरा (₹${amount}).`, "bad");
+          return;
+        }
+        payOnlineWithGateway(moduleName, amount);
+      });
+    });
+
+    document.querySelectorAll("[data-go]").forEach((btn) => {
+      btn.addEventListener("click", () => goTo(btn.getAttribute("data-go")));
+    });
+
+    document.querySelectorAll(".nav-btn").forEach((btn) => {
+      btn.addEventListener("click", () => goTo(btn.getAttribute("data-nav")));
+    });
+
+    amountInput.addEventListener("input", () => {
+      amountText.textContent = String(getAmount());
+    });
+
+    amountInput.value = "1";
+    amountText.textContent = "1";
+    buildQrImage(1);
+    renderTransactions();
+    loadConfigStatus();
+
+    // Force OTP login at app start
+    sessionStorage.removeItem(AUTH_KEY);
+    hideApp();
+  </script>
+</body>
+</html>
